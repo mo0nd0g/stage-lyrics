@@ -57,9 +57,27 @@ function render(){
       row.style.alignItems="center";
       row.style.gap="6px";
       row.style.marginBottom="6px";
-      row.draggable=true;
+      row.draggable=false;
       row.dataset.songId=x.id;
-      row.title="Drag to reorder";
+      row.title="Use the handle to drag and reorder";
+
+      const handle=document.createElement("span");
+      handle.textContent="⠿";
+      handle.title="Drag to reorder";
+      handle.setAttribute("aria-label",`Drag ${x.title} to reorder`);
+      handle.draggable=true;
+      handle.style.cursor="grab";
+      handle.style.color="#fff";
+      handle.style.fontSize="23px";
+      handle.style.fontWeight="800";
+      handle.style.padding="0 5px";
+      handle.style.userSelect="none";
+      handle.addEventListener("dragstart",e=>{
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",x.id);
+        row.style.opacity=".45";
+      });
+      handle.addEventListener("dragend",()=>{row.style.opacity="1"});
 
       const b=document.createElement("button");
       b.className="song-item"+(x.id===currentSong?" active":"");
@@ -109,14 +127,8 @@ function render(){
       });
 
       controls.append(up,down);
-      row.append(b,controls);
+      row.append(handle,b,controls);
 
-      row.addEventListener("dragstart",e=>{
-        row.style.opacity=".45";
-        e.dataTransfer.effectAllowed="move";
-        e.dataTransfer.setData("text/plain",x.id);
-      });
-      row.addEventListener("dragend",()=>{row.style.opacity="1"});
       row.addEventListener("dragover",e=>{
         e.preventDefault();
         e.dataTransfer.dropEffect="move";
