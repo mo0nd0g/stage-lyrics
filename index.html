@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><meta name="description" content="A simple, free lyrics app for live performance.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>STAGE LYRICS</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand">STAGE <span>LYRICS</span></div><div class="top-actions"><button id="installBtn" class="quiet hidden">Install app</button><button id="stageBtn" class="primary">Stage mode</button></div></header>
+<main class="app">
+<aside class="sidebar">
+  <div class="section-head"><h2>Setlists</h2><button id="addSetlist" class="round" aria-label="Add setlist">+</button></div>
+  <div id="setlists" class="setlists"></div>
+  <div class="section-head songs-head"><h2>Songs</h2><button id="addSong" class="round" aria-label="Add song">+</button></div>
+  <div id="songs" class="songs"></div>
+</aside>
+<section class="workspace">
+  <div class="song-toolbar"><div><div class="eyebrow" id="currentSetlistName">MY SETLIST</div><h1 id="songTitle">Welcome to Stage Lyrics</h1></div><div class="song-actions"><button id="editSong" class="quiet">Edit</button><button id="deleteSong" class="quiet danger">Delete</button></div></div>
+  <article id="lyrics" class="lyrics" aria-live="polite">Add a song to get started.\n\nYour lyrics will appear here in large, easy-to-read text.</article>
+  <div class="player-controls">
+    <button id="prevSong" class="control">← Previous</button>
+    <div class="scroll-controls"><button id="scrollToggle" class="primary">Start scrolling</button><label>Speed <input id="scrollSpeed" type="range" min="1" max="10" value="3"><span id="speedValue">3</span></label></div>
+    <button id="nextSong" class="control">Next →</button>
+  </div>
+</section>
+</main>
+<dialog id="songDialog"><form method="dialog" id="songForm"><div class="dialog-head"><h2 id="songDialogTitle">Add song</h2><button class="close" value="cancel" aria-label="Close">×</button></div><label>Song title<input id="songName" maxlength="120" required placeholder="Song title"></label><label>Lyrics<textarea id="songText" rows="12" placeholder="Paste or type lyrics here…"></textarea></label><div class="dialog-actions"><button value="cancel" class="control">Cancel</button><button id="saveSong" value="default" class="primary">Save song</button></div></form></dialog>
+<dialog id="setlistDialog"><form method="dialog" id="setlistForm"><div class="dialog-head"><h2>New setlist</h2><button class="close" value="cancel" aria-label="Close">×</button></div><label>Setlist name<input id="setlistName" maxlength="80" required placeholder="e.g. Friday night"></label><div class="dialog-actions"><button value="cancel" class="control">Cancel</button><button id="saveSetlist" value="default" class="primary">Create</button></div></form></dialog>
+<div id="stageOverlay" class="stage-overlay" hidden><div class="stage-top"><span id="stageSongName">STAGE LYRICS</span><div><button id="stageScroll" class="quiet">Start scrolling</button><button id="exitStage" class="quiet">Exit ✕</button></div></div><div id="stageLyrics" class="stage-lyrics"></div><div class="stage-bottom"><button id="stagePrev">← Previous</button><button id="stageNext">Next →</button></div></div>
+<script src="app.js"></script>
+</body></html>
