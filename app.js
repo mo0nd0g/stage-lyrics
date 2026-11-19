@@ -88,8 +88,10 @@ function render(){
 
       const controls=document.createElement("div");
       controls.style.display="flex";
-      controls.style.flex="0 0 auto";
-      controls.style.gap="3px";
+      controls.style.flexDirection="column";
+      controls.style.flex="0 0 22px";
+      controls.style.gap="1px";
+      controls.style.alignItems="center";
 
       const up=document.createElement("button");
       up.type="button";
@@ -114,13 +116,15 @@ function render(){
       };
 
       [up,down].forEach(control=>{
-        control.style.minWidth="28px";
-        control.style.padding="4px";
+        control.style.minWidth="22px";
+        control.style.width="22px";
+        control.style.padding="0";
+        control.style.height="18px";
         control.style.color="#fff";
         control.style.background="#292929";
         control.style.border="1px solid #666";
         control.style.fontWeight="800";
-        control.style.fontSize="14px";
+        control.style.fontSize="12px";
         control.style.lineHeight="1";
         control.style.cursor=control.disabled?"default":"pointer";
         control.style.opacity=control.disabled?".3":"1";
