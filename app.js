@@ -89,7 +89,7 @@ function render(){
       const controls=document.createElement("div");
       controls.style.display="flex";
       controls.style.flexDirection="column";
-      controls.style.flex="0 0 22px";
+      controls.style.flex="0 0 18px";
       controls.style.gap="1px";
       controls.style.alignItems="center";
 
@@ -116,15 +116,15 @@ function render(){
       };
 
       [up,down].forEach(control=>{
-        control.style.minWidth="22px";
-        control.style.width="22px";
+        control.style.minWidth="18px";
+        control.style.width="18px";
         control.style.padding="0";
-        control.style.height="18px";
+        control.style.height="15px";
         control.style.color="#fff";
         control.style.background="#292929";
         control.style.border="1px solid #666";
         control.style.fontWeight="800";
-        control.style.fontSize="12px";
+        control.style.fontSize="10px";
         control.style.lineHeight="1";
         control.style.cursor=control.disabled?"default":"pointer";
         control.style.opacity=control.disabled?".3":"1";
