@@ -114,13 +114,13 @@ function render(){
       };
 
       [up,down].forEach(control=>{
-        control.style.minWidth="36px";
-        control.style.padding="6px";
+        control.style.minWidth="28px";
+        control.style.padding="4px";
         control.style.color="#fff";
         control.style.background="#292929";
         control.style.border="1px solid #666";
         control.style.fontWeight="800";
-        control.style.fontSize="18px";
+        control.style.fontSize="14px";
         control.style.lineHeight="1";
         control.style.cursor=control.disabled?"default":"pointer";
         control.style.opacity=control.disabled?".3":"1";
