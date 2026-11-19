@@ -95,7 +95,7 @@ function render(){
 
       const up=document.createElement("button");
       up.type="button";
-      up.textContent="↑";
+      up.textContent="▲";
       up.title="Move song up";
       up.setAttribute("aria-label",`Move ${x.title} up`);
       up.disabled=index===0;
@@ -106,7 +106,7 @@ function render(){
 
       const down=document.createElement("button");
       down.type="button";
-      down.textContent="↓";
+      down.textContent="▼";
       down.title="Move song down";
       down.setAttribute("aria-label",`Move ${x.title} down`);
       down.disabled=index===s.songs.length-1;
@@ -119,12 +119,12 @@ function render(){
         control.style.minWidth="18px";
         control.style.width="18px";
         control.style.padding="0";
-        control.style.height="15px";
+        control.style.height="12px";
         control.style.color="#fff";
-        control.style.background="#292929";
-        control.style.border="1px solid #666";
+        control.style.background="transparent";
+        control.style.border="0";
         control.style.fontWeight="800";
-        control.style.fontSize="10px";
+        control.style.fontSize="9px";
         control.style.lineHeight="1";
         control.style.cursor=control.disabled?"default":"pointer";
         control.style.opacity=control.disabled?".3":"1";
