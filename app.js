@@ -327,6 +327,52 @@ $("installBtn").onclick=async()=>{
   $("installBtn").classList.add("hidden");
 };
 
+
+function downloadBackup(){
+  const backup={format:"stage-lyrics-backup",version:1,exportedAt:new Date().toISOString(),data};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  link.href=url;
+  link.download="stage-lyrics-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function validBackup(value){
+  const d=value?.format==="stage-lyrics-backup"?value.data:value?.data||value;
+  return !!d&&Array.isArray(d.setlists)&&d.setlists.every(s=>
+    s&&typeof s.id==="string"&&typeof s.name==="string"&&Array.isArray(s.songs)&&s.songs.every(x=>
+      x&&typeof x.id==="string"&&typeof x.title==="string"&&typeof x.lyrics==="string"
+    )
+  )?d:null;
+}
+
+$("exportBackup").onclick=downloadBackup;
+$("importBackup").onclick=()=>$("backupFile").click();
+$("backupFile").onchange=async e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  try{
+    const parsed=JSON.parse(await file.text());
+    const restored=validBackup(parsed);
+    if(!restored)throw new Error("This file is not a valid Stage Lyrics backup.");
+    if(!confirm("Restoring this backup will replace the songs and setlists currently stored on this device. Continue?"))return;
+    data=restored;
+    currentSet=data.setlists[0]?.id||null;
+    currentSong=data.setlists[0]?.songs[0]?.id||null;
+    save();
+    render();
+    alert("Backup restored successfully.");
+  }catch(err){
+    alert(err.message==="This file is not a valid Stage Lyrics backup."?err.message:"Could not read this backup file.");
+  }finally{
+    e.target.value="";
+  }
+};
+
 if("serviceWorker"in navigator){
   window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 }
