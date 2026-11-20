@@ -14,6 +14,12 @@
   <div id="setlists" class="setlists"></div>
   <div class="section-head songs-head"><h2>Songs</h2><button id="addSong" class="round" aria-label="Add song">+</button></div>
   <div id="songs" class="songs"></div>
+  <div class="backup-tools">
+    <div class="section-head"><h2>Backup</h2></div>
+    <button id="exportBackup" class="control backup-button" type="button">Download backup</button>
+    <button id="importBackup" class="control backup-button" type="button">Restore backup</button>
+    <input id="backupFile" type="file" accept="application/json,.json" hidden>
+  </div>
 </aside>
 <section class="workspace">
   <div class="song-toolbar"><div><div class="eyebrow" id="currentSetlistName">MY SETLIST</div><h1 id="songTitle">Welcome to Stage Lyrics</h1></div><div class="song-actions"><button id="editSong" class="quiet">Edit</button><button id="deleteSong" class="quiet danger">Delete</button></div></div>
