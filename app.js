@@ -2,6 +2,8 @@
 const $=id=>document.getElementById(id);
 const KEY="stage-lyrics-v1";
 let data=load(), currentSet=data.setlists[0]?.id||null, currentSong=null, editingId=null, scrollTimer=null, wakeLock=null;
+let stageFontScale=Number.isFinite(data.stageFontScale)?Math.min(1.2,Math.max(.65,data.stageFontScale)):.9;
+data.stageFontScale=stageFontScale;
 
 function uid(){return Math.random().toString(36).slice(2,10)}
 
@@ -15,6 +17,25 @@ function load(){
 }
 
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+
+function updateStageFontSize(){
+  const scale=stageFontScale;
+  $("stageLyrics").style.fontSize=`clamp(${(27*scale).toFixed(1)}px, ${(4.6*scale).toFixed(2)}vw, ${(64*scale).toFixed(1)}px)`;
+  $("stageFontValue").textContent=`${Math.round(scale*100)}%`;
+  $("stageFontDown").disabled=scale<=.65;
+  $("stageFontUp").disabled=scale>=1.2;
+}
+
+function changeStageFontSize(amount){
+  stageFontScale=Math.min(1.2,Math.max(.65,Math.round((stageFontScale+amount)*100)/100));
+  data.stageFontScale=stageFontScale;
+  save();
+  updateStageFontSize();
+}
+
+$("stageFontDown").onclick=()=>changeStageFontSize(-.05);
+$("stageFontUp").onclick=()=>changeStageFontSize(.05);
+
 function setlist(){return data.setlists.find(s=>s.id===currentSet)}
 function song(){return setlist()?.songs.find(s=>s.id===currentSong)}
 
@@ -156,6 +177,7 @@ function render(){
   $("lyrics").textContent=active?.lyrics||"Add a song to get started.";
   $("stageSongName").textContent=active?.title||"STAGE LYRICS";
   $("stageLyrics").textContent=active?.lyrics||"Add a song to get started.";
+  updateStageFontSize();
   const has=!!active;
   $("editSong").disabled=!has;
   $("deleteSong").disabled=!has;
@@ -361,6 +383,8 @@ $("backupFile").onchange=async e=>{
     if(!restored)throw new Error("This file is not a valid Stage Lyrics backup.");
     if(!confirm("Restoring this backup will replace the songs and setlists currently stored on this device. Continue?"))return;
     data=restored;
+    stageFontScale=Number.isFinite(data.stageFontScale)?Math.min(1.2,Math.max(.65,data.stageFontScale)):.9;
+    data.stageFontScale=stageFontScale;
     currentSet=data.setlists[0]?.id||null;
     currentSong=data.setlists[0]?.songs[0]?.id||null;
     save();
