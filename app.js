@@ -398,7 +398,16 @@ $("backupFile").onchange=async e=>{
 };
 
 if("serviceWorker"in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  window.addEventListener("load",async()=>{
+    const hadController=!!navigator.serviceWorker.controller;
+    if(hadController){
+      navigator.serviceWorker.addEventListener("controllerchange",()=>window.location.reload(),{once:true});
+    }
+    try{
+      const registration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
+      registration.update().catch(()=>{});
+    }catch(e){}
+  });
 }
 
 render();
