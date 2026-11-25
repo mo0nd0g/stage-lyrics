@@ -1,7 +1,7 @@
 
 const $=id=>document.getElementById(id);
 const KEY="stage-lyrics-v1";
-let data=load(), currentSet=data.setlists[0]?.id||null, currentSong=null, editingId=null, scrollTimer=null, wakeLock=null;
+let data=load(), currentSet=data.setlists[0]?.id||null, currentSong=null, editingId=null, editingSetlistId=null, scrollTimer=null, wakeLock=null;
 let stageFontScale=Number.isFinite(data.stageFontScale)?Math.min(1.2,Math.max(.65,data.stageFontScale)):.9;
 data.stageFontScale=stageFontScale;
 
@@ -55,19 +55,62 @@ function render(){
   if(!setlist())currentSet=data.setlists[0]?.id||null;
   const s=setlist();
   $("setlists").innerHTML="";
-  data.setlists.forEach(x=>{
+  data.setlists.forEach((x,index)=>{
+    const row=document.createElement("div");
+    row.className="setlist-row";
+    row.dataset.setlistId=x.id;
+
+    const handle=document.createElement("span");
+    handle.className="setlist-drag-handle";
+    handle.textContent="⠿";
+    handle.title="Drag to reorder setlists";
+    handle.setAttribute("aria-label",`Drag ${x.name} to reorder`);
+    handle.draggable=true;
+    handle.addEventListener("dragstart",e=>{
+      e.dataTransfer.effectAllowed="move";
+      e.dataTransfer.setData("text/plain",x.id);
+      row.style.opacity=".45";
+    });
+    handle.addEventListener("dragend",()=>{row.style.opacity="1"});
+
     const b=document.createElement("button");
+    b.type="button";
     b.className="setlist-item"+(x.id===currentSet?" active":"");
-    b.innerHTML=`<span></span><span class="rename" title="Rename setlist">Rename</span>`;
-    b.firstChild.textContent=x.name;
+    b.textContent=x.name;
+    b.title=x.name;
     b.onclick=()=>{currentSet=x.id;currentSong=x.songs[0]?.id||null;render()};
-    b.querySelector(".rename").onclick=e=>{
-      e.stopPropagation();
-      const n=prompt("Rename setlist",x.name);
-      if(n?.trim()){x.name=n.trim();save();render()}
-    };
-    $("setlists").append(b);
+
+    const controls=document.createElement("div");
+    controls.className="setlist-reorder-controls";
+    const up=document.createElement("button");
+    up.type="button";
+    up.textContent="▲";
+    up.title="Move setlist up";
+    up.setAttribute("aria-label",`Move ${x.name} up`);
+    up.disabled=index===0;
+    up.onclick=e=>{e.stopPropagation();if(index>0)reorderSetlist(x.id,data.setlists[index-1].id)};
+
+    const down=document.createElement("button");
+    down.type="button";
+    down.textContent="▼";
+    down.title="Move setlist down";
+    down.setAttribute("aria-label",`Move ${x.name} down`);
+    down.disabled=index===data.setlists.length-1;
+    down.onclick=e=>{e.stopPropagation();if(index<data.setlists.length-1)reorderSetlist(x.id,data.setlists[index+1].id)};
+
+    [up,down].forEach(control=>{
+      control.className="setlist-reorder-button";
+      control.style.opacity=control.disabled?".3":"1";
+      control.style.cursor=control.disabled?"default":"pointer";
+    });
+    controls.append(up,down);
+    row.append(handle,b,controls);
+    row.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move"});
+    row.addEventListener("drop",e=>{e.preventDefault();reorderSetlist(e.dataTransfer.getData("text/plain"),x.id)});
+    $("setlists").append(row);
   });
+  $("editSetlist").disabled=!s;
+  $("deleteSetlist").disabled=!s;
 
   $("songs").innerHTML="";
   if(s){
@@ -185,20 +228,61 @@ function render(){
   $("nextSong").disabled=!has;
 }
 
-$("addSetlist").onclick=()=>{
-  $("setlistName").value="";
+function reorderSetlist(fromId,toId){
+  if(!fromId||!toId||fromId===toId)return;
+  const from=data.setlists.findIndex(x=>x.id===fromId);
+  const to=data.setlists.findIndex(x=>x.id===toId);
+  if(from<0||to<0)return;
+  const [item]=data.setlists.splice(from,1);
+  data.setlists.splice(to,0,item);
+  save();
+  render();
+}
+
+function openSetlist(edit=false){
+  const existing=edit?setlist():null;
+  editingSetlistId=existing?.id||null;
+  $("setlistDialogTitle").textContent=edit?"Edit setlist":"New setlist";
+  $("setlistName").value=existing?.name||"";
+  $("saveSetlist").textContent=edit?"Save changes":"Create";
   $("setlistDialog").showModal();
   $("setlistName").focus();
+}
+
+$("addSetlist").onclick=()=>openSetlist(false);
+$("editSetlist").onclick=()=>{if(setlist())openSetlist(true)};
+
+$("deleteSetlist").onclick=()=>{
+  const selected=setlist();
+  if(!selected)return;
+  if(data.setlists.length<=1){
+    alert("At least one setlist must remain. You can delete individual songs instead.");
+    return;
+  }
+  if(!confirm(`Delete setlist "${selected.name}" and all its songs? This cannot be undone unless you have a backup.`))return;
+  const oldIndex=data.setlists.findIndex(x=>x.id===selected.id);
+  data.setlists=data.setlists.filter(x=>x.id!==selected.id);
+  const next=data.setlists[Math.min(oldIndex,data.setlists.length-1)];
+  currentSet=next?.id||null;
+  currentSong=next?.songs[0]?.id||null;
+  save();
+  render();
 };
 
 $("saveSetlist").onclick=e=>{
   e.preventDefault();
   const name=$("setlistName").value.trim();
   if(!name)return;
-  const s={id:uid(),name,songs:[]};
-  data.setlists.push(s);
-  currentSet=s.id;
-  currentSong=null;
+  const existing=data.setlists.find(x=>x.id===editingSetlistId);
+  if(existing){
+    existing.name=name;
+  }else{
+    const created={id:uid(),name,songs:[]};
+    data.setlists.push(created);
+    currentSet=created.id;
+    currentSong=null;
+  }
+  editingSetlistId=null;
   save();
   $("setlistDialog").close();
   render();
@@ -294,11 +378,17 @@ function toggleScroll(){scrollTimer?stopScroll():startScroll()}
 $("scrollToggle").onclick=toggleScroll;
 $("stageScroll").onclick=toggleScroll;
 
-$("scrollSpeed").oninput=e=>{
-  $("speedValue").textContent=e.target.value;
-  speed=+e.target.value;
-  if(scrollTimer)startScroll();
-};
+function setScrollSpeed(value){
+  speed=Math.max(1,Math.min(10,Number(value)||1));
+  $("scrollSpeed").value=String(speed);
+  $("speedValue").textContent=String(speed);
+  $("stageScrollSpeed").value=String(speed);
+  $("stageSpeedValue").textContent=String(speed);
+}
+
+$("scrollSpeed").oninput=e=>setScrollSpeed(e.target.value);
+$("stageScrollSpeed").oninput=e=>setScrollSpeed(e.target.value);
+setScrollSpeed($("scrollSpeed").value);
 
 async function keepAwake(){
   try{
