@@ -220,12 +220,27 @@ function render(){
   $("lyrics").textContent=active?.lyrics||"Add a song to get started.";
   $("stageSongName").textContent=active?.title||"STAGE LYRICS";
   $("stageLyrics").textContent=active?.lyrics||"Add a song to get started.";
+  updateStageNavigation();
   updateStageFontSize();
   const has=!!active;
   $("editSong").disabled=!has;
   $("deleteSong").disabled=!has;
   $("prevSong").disabled=!has;
   $("nextSong").disabled=!has;
+}
+
+
+function updateStageNavigation(){
+  const songs=setlist()?.songs||[];
+  const index=songs.findIndex(x=>x.id===currentSong);
+  const previous=songs.length? songs[(index-1+songs.length)%songs.length]:null;
+  const next=songs.length? songs[(index+1)%songs.length]:null;
+  const previousTitle=previous?.title||"Previous";
+  const nextTitle=next?.title||"Next";
+  $("stagePrev").textContent=`← ${previousTitle}`;
+  $("stageNext").textContent=`${nextTitle} →`;
+  $("stagePrev").title=previous? `Previous song: ${previous.title}` : "Previous song";
+  $("stageNext").title=next? `Next song: ${next.title}` : "Next song";
 }
 
 function reorderSetlist(fromId,toId){
